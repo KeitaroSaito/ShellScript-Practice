@@ -22,7 +22,6 @@ if [ $EXIST = 0 ] ; then
   do
     # デリミタは一行取れるようなものならなんでもいい
     if [ "$CONTINUATION_FLG" = "false" ] ; then
-      # CONTINUATION_FLG=`awk -F'@@' ' NR=='$LN' && $0 ="'"$WD"'"
       CONTINUATION_FLG=`awk -F'@@' '
       {
         if(NR=='$LN' && $0=="'"$WD"'"){
@@ -32,7 +31,7 @@ if [ $EXIST = 0 ] ; then
       ' $file`
 
       if [ "$CONTINUATION_FLG" = "true" ] ; then
-        source FILE_NAME=$file
+        FILE_NAME="$file"
         break
       fi
     fi
@@ -47,31 +46,35 @@ do
   if [ "$CONTINUATION_FLG" = "false" ] ; then
     awk -F'|' '
     {
-      if($4 == '$TARGET_WORD'){
+      if($4 == "'$TARGET_WORD'"){
         print $0 >> "'$OUTPUT_DEST'"
       }
     }
-    ' $file
+    ' "$file"
   else
     # 途中のファイルから処理をする場合
     if [ "$file" = "$FILE_NAME" ] ; then
       TARGET_FLG="true"
-      awk -F'|' '$4=='$TARGET_WORD' && NR > '$LN'
+      awk -F'|' '
       {
-        print $0  >> "'$OUTPUT_DEST'"
+        if($4=="'$TARGET_WORD'" && NR > '$LN'){
+          print $0  >> "'$OUTPUT_DEST'"
+        }
       }
-      '$file
+      ' "$file"
     elif [ "$TARGET_FLG" = "true" ] ; then
-      awk -F'|' '$4=='$TARGET_WORD'
+      awk -F'|' '
       {
-        print $0 >> "'$OUTPUT_DEST'"
+        if($4=="'$TARGET_WORD'"){
+          print $0 >> "'$OUTPUT_DEST'"
+        }
       }
-      '$file
+      ' "$file"
     fi
   fi
 
   # 最後に処理したfile を記憶しておく
-  LAST_FILE="${file}"
+  LAST_FILE="$file"
 
 done
   
