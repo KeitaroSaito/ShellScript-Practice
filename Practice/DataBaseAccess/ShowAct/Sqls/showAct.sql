@@ -1,0 +1,8 @@
+SELECT
+  ACT_NAME AS アクティビティ名,
+  COUNT(ACT_NAME) AS 実行回数
+FROM
+  ACTIVITY
+GROUP BY
+  ACT_NAME
+;
