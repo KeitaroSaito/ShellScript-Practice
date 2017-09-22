@@ -1,14 +1,18 @@
 #!/bin/sh
 echo "`df $1`" | awk '
 BEGIN {
-  LOG_PATH = """/var/log/system.log""" 
+  LOG_PATH = "/var/log/system.log"
 }
 {
   if(NR == 2){
-    if(substr($5, 0, length($5)-1) >= '$2'){
-      print strftime("%Y/%m/%d %H:%M:%S", systime()) >> "/var/log/system.log"
-      print "ディスクの使用量が" "'$2'" "% を超えました。" >> "/var/log/system.log"
-      print "ファイルシステム: " $1 ", 使用率(%):" $5 "\n" >> "/var/log/system.log"
+    
+    # ディスク使用率の欄から"%" を除外
+    gsub("%", "", $5);
+    
+    if($5 >= '$2'){
+      print strftime("%Y/%m/%d %H:%M:%S", systime()) >> LOG_PATH
+      print "ディスクの使用量が" "'$2'" "% を超えました。" >> LOG_PATH
+      print "ファイルシステム: " $1 ", 使用率(%):" $5 "\n" >> LOG_PATH
     }
   }
 }'
