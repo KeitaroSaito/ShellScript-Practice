@@ -10,7 +10,7 @@ case $1 in
     EXEC_SQL="${SQL_DIR}getProject.sql $2"
     ;;
   "--entry_after")
-    EXEC_SQL="${SQL_DIR}getEntryAfterMember.sql `echo $2 | tr "/" "-"`"
+    EXEC_SQL="${SQL_DIR}getEntryAfterMember.sql `echo $2 | tr '/' '-'`"
     ;;
   "--all")
     EXEC_SQL="${SQL_DIR}getAll.sql"
