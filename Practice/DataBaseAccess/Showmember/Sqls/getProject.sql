@@ -1,19 +1,19 @@
 set pages 10000 lines 10000 trims on
-col PROJECT_NAME for a20
-col MEMBER_NAME for a20
+col project_name for a20
+col member_name for a20
 
 SELECT
-  PRO.PROJECT_NAME, MEM.MEMBER_NAME
+  pro.project_name, mem.member_name
 FROM
-  MEMBER MEM
+  member mem
 INNER JOIN
-  J_PROJECT_MEMBER JPM
+  j_project_member jpm
 ON
-  MEM.MEMBER_ID = JPM.MEMBER_ID
+  mem.member_id = jpm.member_id
 INNER JOIN
-  PROJECT PRO
+  project pro
 ON
-  PRO.PROJECT_ID = JPM.PROJECT_ID
+  pro.project_id = jpm.project_id
 WHERE
-  PRO.PROJECT_NAME = '&1'
+  pro.project_name = '&1'
 ;

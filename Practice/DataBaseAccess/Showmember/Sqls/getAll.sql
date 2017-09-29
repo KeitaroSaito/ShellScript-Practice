@@ -1,47 +1,48 @@
 set pages 10000 lines 10000 trims on
-col PROJECT_ID for a10
-col PROJECT_NAME for a12
-col END_USER for a8
-col START_DATE for a10
-col RELEASE_DATE for a12
-col PROJECT_STATUS for a14
-col MEMBER_NAME for a11
-col MEMBER_AGE for a10
-col ENTRYDATE for a10
-col FAVORITE_FOOD for a20
+col project_id for a10
+col project_name for a12
+col end_user for a8
+col start_date for a10
+col release_date for a12
+col project_status for a14
+col member_name for a11
+col member_age for a10
+col entrydate for a10
+col favorite_food for a20
 
 SELECT
-  PRO.PROJECT_ID,
-  PRO.PROJECT_NAME,
-  EU.END_USER_NAME AS END_USER,
-  TO_CHAR(PRO.START_DATE,'YYYY/MM/DD') AS START_DATE,
-  TO_CHAR(PRO.RELEASE_DATE, 'YYYY/MM/DD') AS RELEASE_DATE,
+  pro.project_id,
+  pro.project_name,
+  eu.end_user_name AS end_user,
+  TO_CHAR(pro.start_date, 'YYYY/MM/DD') AS start_date,
+  TO_CHAR(pro.release_date, 'YYYY/MM/DD') AS release_date,
   CASE
-    WHEN PRO.PROJECT_STATUS = 0 THEN '保守'
+    WHEN pro.project_status = 0 THEN '保守'
     ELSE '開発'
-  END AS PROJECT_STATUS,
-  MEM.MEMBER_NAME,
+  END AS project_status,
+  mem.member_name,
   TO_CHAR(
     EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM MEM.BIRTHDAY) -
+    EXTRACT(YEAR FROM SYSDATE) - EXTRACT(YEAR FROM mem.birthday) -
       CASE
-        WHEN TO_CHAR(SYSDATE, 'MMDD') < TO_CHAR(MEM.BIRTHDAY, 'MMDD') THEN 1
+        WHEN TO_CHAR(SYSDATE, 'MMDD') < TO_CHAR(mem.birthday, 'MMDD') THEN 1
         ELSE 0 
       END
-  ) AS MEMBER_AGE,
-  TO_CHAR(MEM.ENTRYDATE,'YYYY/MM/DD') AS ENTRYDATE,
-  MEM.FAVORITE_FOOD
+  ) AS member_age,
+  TO_CHAR(mem.entrydate,'YYYY/MM/DD') AS entrydate,
+  mem.favorite_food
 FROM
-  MEMBER MEM
+  member mem
 INNER JOIN
-  J_PROJECT_MEMBER JPM
+  j_project_member jpm
 ON
-  MEM.MEMBER_ID = JPM.MEMBER_ID
+  mem.member_id = jpm.member_id
 INNER JOIN
-  PROJECT PRO
+  project pro
 ON
-  PRO.PROJECT_ID = JPM.PROJECT_ID
+  pro.project_id = jpm.project_id
 INNER JOIN
-  END_USER EU
+  end_user eu
 ON
-  EU.END_USER_ID = PRO.END_USER_ID
+  eu.end_user_id = pro.end_user_id
 ;
