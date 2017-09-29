@@ -18,11 +18,11 @@ echo -n > $OUTPUT_DESTINATION
 
 # 既に処理した記録があるかどうかチェック
 if [ $EXIST_PROCESS_LOG = 0 ] ; then
-  FILE_NAME=find ${TARGET_PATH} -type f | xargs grep "$LINE_CONTENT"
+  FILE_NAME=find ${TARGET_PATH} -type f | xargs grep "$LINE_CONTENT" | head -n 1
   continuation_flg="true"
 fi
 
-TARGET_FLG="false"
+target_flg="false"
 # 対象ログの抽出処理
 for file in `find ${TARGET_PATH} -type f | sort -r`
 do
@@ -40,7 +40,7 @@ do
 
     if [ "$file" = "$FILE_NAME" ] ; then
       # 途中まで処理したファイルの場合
-      TARGET_FLG="true"
+      target_flg="true"
       sed -n '$LINE_NUMBER,$p' | awk -F'|' '
       {
         if($4=="'$TARGET_WORD'"){
@@ -48,7 +48,7 @@ do
         }
       }
       ' "$file"
-    elif [ "$TARGET_FLG" = "true" ] ; then
+    elif [ "$target_flg" = "true" ] ; then
       # 新しく処理をするファイルの場合
       awk -F'|' '
       {
