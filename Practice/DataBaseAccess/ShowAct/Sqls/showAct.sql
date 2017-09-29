@@ -1,8 +1,8 @@
 SELECT
-  ACT_NAME AS アクティビティ名,
-  COUNT(ACT_NAME) AS 実行回数
+  act_name AS アクティビティ名,
+  COUNT(act_name) AS 実行回数
 FROM
-  ACTIVITY
+  activity
 GROUP BY
-  ACT_NAME
+  act_name
 ;
