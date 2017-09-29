@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# プロパティファイルから、ユーザID、パスワード、接続先DB名を読み込み
+source ../access_info.properties
 # SQL ファイル格納ディレクトリの相対パス
 readonly SQL_DIR="./Sqls/"
 
@@ -22,7 +24,7 @@ case $1 in
 esac
 
 # データベース接続コマンド
-CONNECT_DB="connect testUser/password@ORCLPDB"
+CONNECT_DB="connect ${USER_ID}/${PASSWORD}@${DB_NAME}"
 
 # SQL 実行
 sqlplus -s /nolog << EOF
