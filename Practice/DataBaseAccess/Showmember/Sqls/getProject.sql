@@ -6,14 +6,8 @@ SELECT
   pro.project_name, mem.member_name
 FROM
   member mem
-INNER JOIN
-  j_project_member jpm
-ON
-  mem.member_id = jpm.member_id
-INNER JOIN
-  project pro
-ON
-  pro.project_id = jpm.project_id
+INNER JOIN j_project_member jpm ON mem.member_id = jpm.member_id
+INNER JOIN project pro ON pro.project_id = jpm.project_id
 WHERE
   pro.project_name = '&1'
 ;
