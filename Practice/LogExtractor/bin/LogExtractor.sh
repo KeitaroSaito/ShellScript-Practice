@@ -45,10 +45,7 @@ echo -n > $OUTPUT_DESTINATION
 
 # 既に処理した記録があるかどうかチェック
 if [ $EXIST_PROCESS_LOG = 0 ] ; then
-  FILE_NAME=`find $TARGET_PATH -type f | xargs grep -l "$LINE_CONTENT"`
-
-
-  #FILE_NAME=find "$TARGET_PATH" -type f | xargs grep "$LINE_CONTENT" | head -n 1
+  FILE_NAME=`find $TARGET_PATH -type f | xargs grep -l "$LINE_CONTENT" | head -n 1`
   continuation_flg="true"
 fi
 
@@ -68,7 +65,7 @@ do
       # 途中まで処理したファイルの場合
       target_flg="true"
 
-      # TODO 自前の関数| からの出力を受け取らせる方法
+      # 自前の関数| からの出力を受け取らせるようにした
       `sed -n $LINE_NUMBER,\\$p $file | extract $TARGET_WORD $OUTPUT_DESTINATION`
 
     elif [ "$target_flg" = "true" ] ; then
@@ -89,5 +86,3 @@ END{
   print NR " " $0 > "'$PROCESS_LOG'"
 }
 ' $LAST_FILE
-
-# mv -f $PROCESS_LOG.tmp $PROCESS_LOG
