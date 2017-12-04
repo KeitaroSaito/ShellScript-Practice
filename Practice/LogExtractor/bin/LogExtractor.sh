@@ -1,75 +1,77 @@
 #!/bin/sh
 
+# 検索対象ファイルから、指定単語が含まれている行を抜き出す
+# $1 指定単語
+# $2 出力先ファイル
+# $3 検索対象ファイル
+function extract(){
+  # パイプにつなぎによる呼び出しか単体での呼び出しか判定し処理を分ける
+  # -p test コマンドのオプション。名前付きパイプであれば真
+  if [ -p /dev/stout ]; then
+    # パイプ呼び出しの場合
+    awk -F'|' '
+    {
+      if($4=="'$1'"){
+        print $0 >> "'$2'"
+      }
+    }
+    ' 
+  else
+   awk -F'|' '
+    {
+      if($4=="'$1'"){
+        print $0 >> "'$2'"
+      }
+    }
+    ' "$3"
+ fi
+}
+
 # 抽出結果出力先
-OUTPUT_DEST="../data/extracted.log"
+readonly OUTPUT_DESTINATION="../data/extracted.log"
 # 前回の処理を記録したファイル
-PROCESS_LOG="LogExtractor_ProsessLog.log"
+readonly PROCESS_LOG="LogExtractor_ProsessLog.log"
 # プロパティファイルから、対象ファイル, 対象文字列を読み込み
 source ../conf/extract.properties
 # 前回処理フラグ
-CONTINUATION_FLG="false"
+continuation_flg="false"
 
-# 前回処理の情報を取得(LD:以前最後に処理した行番号 WD:以前処理した最終行の内容)
-read LN WD < $PROCESS_LOG
-EXIST=$?
+# 前回処理の情報を取得(LINE_NUMBER:以前最後に処理した行番号 LINE_CONTENT:以前処理した最終行の内容)
+read LINE_NUMBER LINE_CONTENT < $PROCESS_LOG
+EXIST_PROCESS_LOG=$?
 
 # 抽出結果出力先を空にする
-echo -n > $OUTPUT_DEST
+echo -n > $OUTPUT_DESTINATION
 
 # 既に処理した記録があるかどうかチェック
-if [ $EXIST = 0 ] ; then 
-  for file in `find ${TARGET_PATH} -type f | sort -r`
-  do
-    # デリミタは一行取れるようなものならなんでもいい
-    if [ "$CONTINUATION_FLG" = "false" ] ; then
-      CONTINUATION_FLG=`awk -F'@@' '
-      {
-        if(NR=='$LN' && $0=="'"$WD"'"){
-          print outputFlg="true"
-        }
-      }
-      ' $file`
-
-      if [ "$CONTINUATION_FLG" = "true" ] ; then
-        FILE_NAME="$file"
-        break
-      fi
-    fi
-  done
+if [ $EXIST_PROCESS_LOG = 0 ] ; then
+  FILE_NAME=`find $TARGET_PATH -type f | xargs grep -l "$LINE_CONTENT" | head -n 1`
+  continuation_flg="true"
 fi
 
-TARGET_FLG="false"
+target_flg="false"
 # 対象ログの抽出処理
 for file in `find ${TARGET_PATH} -type f | sort -r`
 do
   # 前回処理がなかった場合
-  if [ "$CONTINUATION_FLG" = "false" ] ; then
-    awk -F'|' '
-    {
-      if($4 == "'$TARGET_WORD'"){
-        print $0 >> "'$OUTPUT_DEST'"
-      }
-    }
-    ' "$file"
+  if [ "$continuation_flg" = "false" ] ; then
+  
+    extract $TARGET_WORD $OUTPUT_DESTINATION $file
+
   else
     # 途中のファイルから処理をする場合
+
     if [ "$file" = "$FILE_NAME" ] ; then
-      TARGET_FLG="true"
-      awk -F'|' '
-      {
-        if($4=="'$TARGET_WORD'" && NR > '$LN'){
-          print $0  >> "'$OUTPUT_DEST'"
-        }
-      }
-      ' "$file"
-    elif [ "$TARGET_FLG" = "true" ] ; then
-      awk -F'|' '
-      {
-        if($4=="'$TARGET_WORD'"){
-          print $0 >> "'$OUTPUT_DEST'"
-        }
-      }
-      ' "$file"
+      # 途中まで処理したファイルの場合
+      target_flg="true"
+
+      # 自前の関数| からの出力を受け取らせるようにした
+      `sed -n $LINE_NUMBER,\\$p $file | extract $TARGET_WORD $OUTPUT_DESTINATION`
+
+    elif [ "$target_flg" = "true" ] ; then
+      # 新しく処理をするファイルの場合
+      extract $TARGET_WORD $OUTPUT_DESTINATION $file
+
     fi
   fi
 
@@ -84,5 +86,3 @@ END{
   print NR " " $0 > "'$PROCESS_LOG'"
 }
 ' $LAST_FILE
-
-# mv -f $PROCESS_LOG.tmp $PROCESS_LOG
